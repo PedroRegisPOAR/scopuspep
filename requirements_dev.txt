@@ -1,0 +1,6 @@
+scopus==0.10.0
+pandas==0.23.4
+jupyter==1.0.0
+requests==2.20.1
+nbconvert==5.4.0
+Sphinx==1.8.2
