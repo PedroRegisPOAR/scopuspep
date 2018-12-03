@@ -8,5 +8,5 @@ setup(name='scopuspep',
       author_email='pedroalencarregis@hotmail.com',
       license='MIT',
       packages=['scopuspep'],
-      install_requires=['pandas>=0.23.4', 'scopus>=0.10.0'],
+      install_requires=['pandas>=0.23.4', 'scopus==0.10.0'],
       zip_safe=False)
