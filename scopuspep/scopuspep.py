@@ -179,7 +179,7 @@ class Scopuspep():
 		return df
 
 	
-	def who_cited_who(self, df=None):	
+	def who_cited_who(self, df=None, refresh=False):	
 		
 		if df is None:
 			df = self.df
@@ -189,7 +189,7 @@ class Scopuspep():
 
 		EIDs = self.EIDs_list(df)
 
-		EIDs_dict = self.build_EIDs_dict(EIDs)
+		EIDs_dict = self.build_EIDs_dict(EIDs, refresh)
 
 		df_edges = self.build_edges(EIDs, EIDs_dict)	
 		
