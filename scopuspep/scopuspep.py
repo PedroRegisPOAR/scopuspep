@@ -124,7 +124,11 @@ class Scopuspep():
 			EIDs_dict = self.build_EIDs_dict(EIDs, refresh)
 
 
-		dict_source_target = {'Source':[], 'Target':[]}
+		dict_source_target = {'Source':[], 
+											  'Target':[],
+											  'source_article_eid':[],
+											  'target_author_eid':[],										
+											  }
 			
 		for i, eid in enumerate(EIDs):
 			references = EIDs_dict[eid]
@@ -132,6 +136,9 @@ class Scopuspep():
 				if base_eid in references:
 					dict_source_target['Source'].append(j)
 					dict_source_target['Target'].append(i)
+
+					dict_source_target['source_article_eid'].append(base_eid)
+					dict_source_target['target_author_eid'].append(eid)
 					
 		df_edges = pd.DataFrame(dict_source_target)
 		
@@ -170,7 +177,7 @@ class Scopuspep():
 		columns = df.columns.tolist()
 
 		#TODO: Standardise columns names
-		l = 'id Label Cited_by_count Authors_et_al_years main_author_year'.split()
+		l = 'id Label Cited_by_count n_cited n_quotes Authors_et_al_years main_author_year'.split()
 
 		ordered_columns = l + [column for column in columns if column not in l]
 
@@ -178,22 +185,67 @@ class Scopuspep():
 
 		return df
 
-	
-	def who_cited_who(self, df=None, refresh=False):	
-		
+
+	def build_nodes(self, df=None, df_edges=None):
+
 		if df is None:
 			df = self.df
 
-		processed_df = self.process_dataframe(df)
-		df_nodes = self.reindex_data_frame(processed_df)
+		if df_edges is None:
+			if self.df_edges is None:
+				self.df_edges = self.build_edges()					
+			else:
+				df_edges = self.df_edges
+
+		source_article_eid = df_edges['source_article_eid'].value_counts()
+		target_author_eid = df_edges['target_author_eid'].value_counts()
+
+		EIDs = self.EIDs_list(self.df)
+
+		n_cited = [0 if eid not in source_article_eid.keys() 
+							else 
+							source_article_eid[eid]
+							for eid in EIDs
+						]
+
+		n_quotes = [0 if eid not in target_author_eid.keys() 
+								else 
+								target_author_eid[eid] 
+								for eid in EIDs
+							]
+
+		self.df['n_cited'] = n_cited
+		self.df['n_quotes'] = n_quotes
+
+		df = self.reindex_data_frame()
+
+		return df
+
+
+	def who_cited_who(self, df=None, refresh=False):
+		"""
+		
+		Note: The order to build edges and nodes ara importante, because 
+		if it was done in oposite way calculation would be done again unnecessarily.
+		Now as the nodes utilise information from the edges data frame to calculate 
+		`n_cited` and  `n_quotes` it make sense first calculate the edges daframe stuff.
+		"""
+		
+		if df is None:
+			df = self.df
 
 		EIDs = self.EIDs_list(df)
 
 		EIDs_dict = self.build_EIDs_dict(EIDs, refresh)
 
 		df_edges = self.build_edges(EIDs, EIDs_dict)	
-		
+	
 		df_edges = self.delta_years(df_edges)
+
+		# nodes processing
+		processed_df = self.process_dataframe(df)
+
+		df_nodes = self.build_nodes()		
 
 		return df_nodes, df_edges
 
@@ -350,6 +402,7 @@ class Scopuspep():
 		if df_articles is None:
 			df_articles = self.df
 		
+		# TODO: n_connected_articles does not meke sense!
 		dict_source_target = {'Source':[],
 											  'Target':[],
 											  'article_id':[],

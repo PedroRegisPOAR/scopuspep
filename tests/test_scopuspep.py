@@ -154,7 +154,16 @@ class TestStringMethods(unittest.TestCase):
                         }
 
         # Why the .to_dict() return a dict in this format?
-        expected = {'Source': {0: 1, 1: 0, 2: 2}, 'Target': {0: 0, 1: 1, 2: 2}}
+        expected = {'Source': {0: 1, 1: 0, 2: 2}, 
+                            'Target': {0: 0, 1: 1, 2: 2},                            
+                            'source_article_eid': {0: '2-s2.0-84978115007', 
+                                                                1: '2-s2.0-85052823139', 
+                                                                2: '2-s2.0-84902375090'}, 
+                            'target_author_eid': {0: '2-s2.0-85052823139', 
+                                                                1: '2-s2.0-84978115007', 
+                                                                2: '2-s2.0-84902375090'},
+                            }
+
         result = spep.build_edges(EIDs, EIDs_dict).to_dict()
         #print(result)
         self.assertEqual(expected, result)
@@ -163,7 +172,7 @@ class TestStringMethods(unittest.TestCase):
 
         spep = Scopuspep()
 
-        columns = 'id Label Cited_by_count Authors_et_al_years main_author_year A B C'. split()
+        columns = 'id Label Cited_by_count n_cited n_quotes Authors_et_al_years main_author_year A B C'. split()
         
         expected = {column:{} for column in columns}
 
